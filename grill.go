@@ -61,8 +61,7 @@ type GrillStatus struct {
 // Sensor is the interface to retrieve the current temperature
 // of a probe
 type Sensor interface {
-	TemperatureF() (int, error)
-	TemperatureC() (int, error)
+	Temperature() (Temp, error)
 	Location() Location
 	Description() string
 }
