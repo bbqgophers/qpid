@@ -89,9 +89,9 @@ type Thresholder interface {
 // A Targeter sets the desired temperature for a device.
 type Targeter interface {
 	// Target sets the desired temperature, returns current and/or error
-	Target(int) (int, error)
+	Target(Temp) (Temp, error)
 	// Setpoint() returns the currently set desired temperature
-	Setpoint() (int, error)
+	Setpoint() (Temp, error)
 }
 
 type Monitor interface {
