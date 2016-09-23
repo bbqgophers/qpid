@@ -43,6 +43,22 @@ func NewController() *GobotController {
 	}
 	g.AddRobot(robot)
 
+	g.api = api.NewAPI(g.gobot)
+	g.api.Port = "4000"
+	g.api.AddHandler(api.BasicAuth("bbq", "gopher"))
+	g.api.Start()
+	e := g.pi.I2cStart(i2cAddress)
+	if e != nil {
+		return e
+	}
+	go func() {
+		errs := g.gobot.Start()
+		if errs != nil {
+			// hack - maybe change interface?
+			panic(errs)
+		}
+	}()
+
 	pid := pidctrl.NewPIDController(P, I, B)
 	return &GobotController{
 		grillProbe: NewProbe(r),
@@ -61,22 +77,6 @@ func (g *GobotController) GrillMonitor() qpid.Monitor {
 }
 
 func (g *GobotController) Run() error {
-
-	g.api = api.NewAPI(g.gobot)
-	g.api.Port = "4000"
-	g.api.AddHandler(api.BasicAuth("bbq", "gopher"))
-	g.api.Start()
-	e := g.pi.I2cStart(i2cAddress)
-	if e != nil {
-		return e
-	}
-	go func() {
-		errs := g.gobot.Start()
-		if errs != nil {
-			// hack - maybe change interface?
-			panic(errs)
-		}
-	}()
 
 	target, err := g.grillProbe.Setpoint()
 	if err != nil {
