@@ -68,7 +68,18 @@ func (g *GobotController) Run() error {
 	if e != nil {
 		return e
 	}
-	errs := g.gobot.Start()
+	go func(){
+		errs := g.gobot.Start()
+		if errs != nil {
+			// hack - maybe change interface?
+			panic(errs)
+		}
+	}()
+	return nil
+}
+
+func (g *GobotController) Stop() error {
+	errs := g.gobot.Stop()
 	if errs != nil {
 		// hack - maybe change interface?
 		return errs[0]
@@ -88,10 +99,6 @@ func (g *GobotController) Run() error {
 	}
 
 	return nil
-}
-
-func (g *GobotController) Stop() error {
-	panic("not implemented")
 }
 func (g *GobotController) Status() (qpid.GrillStatus, error) {
 	return qpid.GrillStatus{
