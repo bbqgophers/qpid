@@ -23,12 +23,14 @@ type Temp int
 
 // C returns the temperature in Celcius
 func (t *Temp) C() int {
-	return t
+	return int(*t)
 }
 
 // F returns the temperature in Fahrenheit
 func (t *Temp) F() int {
-	return math.Floor(t*9/5) + 32
+	temp := math.Floor(float64(*t) *9/5) + 32
+    if temp< 0 { return int(temp-1.0) }
+    return int(temp)	
 }
 
 // A Grill represents the cooking chamber of a BBQ cooker.
