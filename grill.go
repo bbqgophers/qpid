@@ -28,9 +28,11 @@ func (t *Temp) C() int {
 
 // F returns the temperature in Fahrenheit
 func (t *Temp) F() int {
-	temp := math.Floor(float64(*t) *9/5) + 32
-    if temp< 0 { return int(temp-1.0) }
-    return int(temp)	
+	temp := math.Floor(float64(*t)*9/5) + 32
+	if temp < 0 {
+		return int(temp - 1.0)
+	}
+	return int(temp)
 }
 
 // A Grill represents the cooking chamber of a BBQ cooker.
@@ -44,20 +46,12 @@ type Grill struct {
 	Reporter      GrillReporter
 }
 
-// A Probe measures a temperature at a unique location.
-type Probe struct {
-	ID          int // Unique ID
-	Location    Location
-	Description string
-	Temperature Temp // Current Temperature
-}
-
 // GrillStatus reports the temperatures of the Grill and Food probes at
 // a point in time
 type GrillStatus struct {
-	Time              time.Time
-	GrillTemperatures []Probe
-	FoodTemperatures  []Probe
+	Time         time.Time
+	GrillSensors []Sensor
+	FoodSensors  []Sensor
 }
 
 // Sensor is the interface to retrieve the current temperature
@@ -107,6 +101,7 @@ type CookController interface {
 	FoodMonitors() []Monitor
 	GrillMonitor() Monitor
 	Run() error
+	Stop() error
 }
 
 // GrillReporter outputs metrics from a Grill
