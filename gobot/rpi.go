@@ -14,6 +14,7 @@ import (
 const i2cAddress = 0x4d
 
 var (
+	Sleep = 10
 	P = 3.0
 	I = .05
 	B = 0.0
@@ -25,6 +26,7 @@ type GobotController struct {
 	pi         *raspi.RaspiAdaptor
 	api        *api.API
 	pid        *pidctrl.PIDController
+	heating bool
 }
 
 func NewController() *GobotController {
@@ -75,6 +77,39 @@ func (g *GobotController) Run() error {
 			panic(errs)
 		}
 	}()
+
+	g.pid.Set(100.0)
+
+	for x := 1; x < 1000; x++ {
+
+		time.Sleep(1* time.Second)
+		temp, err := g.grillProbe.Temperature()
+		if err != nil {
+			return err
+		}
+		output := g.pid.Update(float64(temp.C()))
+		fmt.Printf("%d - %d C - Output: %f\n", x, temp, output)
+
+		for x := 1; x < 10; x ++ { 
+
+			if output > float64(x^2) {
+				if !g.heating {
+					g.heating = true
+					fmt.Println("turning on the blower") 
+				}
+				fmt.Println("leaving blower on")
+			} else {
+				if g.heating {
+					g.heating = false
+					fmt.Println("turning blower off")
+				}
+			}
+		}
+		if output < float64(10) {
+			fmt.Println("temperature reached, sleep 10")
+			time.Sleep(10*time.Second)
+		}
+	}
 	return nil
 }
 
@@ -85,18 +120,6 @@ func (g *GobotController) Stop() error {
 		return errs[0]
 	}
 
-	g.pid.Set(100.0)
-
-	for x := 1; x < 1000; x++ {
-
-		time.Sleep(1 * time.Second)
-		temp, err := g.grillProbe.Temperature()
-		if err != nil {
-			return err
-		}
-		output := g.pid.Update(float64(temp.C()))
-		fmt.Printf("%d - %d C - Output: %f", x, temp, output)
-	}
 
 	return nil
 }
