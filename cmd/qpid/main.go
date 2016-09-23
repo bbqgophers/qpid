@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 	temp := b[1]
-	celcius := temp / 5
+	celcius := temp / 5 + b[2]
 	f := celcius*9/5 + 32
 
 	fmt.Println(temp, celcius, f)
