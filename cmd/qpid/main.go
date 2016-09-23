@@ -18,10 +18,14 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
+	// get temperature reading
 	b, e := r.I2cRead(0x4d,3)
 	if e != nil {
 		panic(e)
 	}
+	// 2nd byte is temp C * 5
+	// 3rd byte is temp over 127
 	c := b[1] / 5
+	c = c + b[2]
 	fmt.Println(c)
 }
