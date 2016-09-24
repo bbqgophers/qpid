@@ -12,13 +12,13 @@ func main() {
 	gb.GrillMonitor().Target(100)
 
 	l := log.New()
-	l.Listen(gb.Notifications())
+	go l.Listen(gb.Notifications())
 
 	p := prometheus.NewSink()
-	p.Listen(gb.Metrics())
+	go p.Listen(gb.Metrics())
 
 	t := twillio.NewClient()
-	t.Listen(gb.GrillMonitor().Alerts())
+	go t.Listen(gb.GrillMonitor().Alerts())
 	err := gb.Run()
 	if err != nil {
 		panic(err)
