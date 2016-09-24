@@ -39,20 +39,20 @@ func NewController() *GobotController {
 	)
 	errs := r.Connect()
 	if errs != nil {
-		return nil
+		panic(errs)
 	}
 	g.AddRobot(robot)
 
-	g.api = api.NewAPI(g.gobot)
-	g.api.Port = "4000"
-	g.api.AddHandler(api.BasicAuth("bbq", "gopher"))
-	g.api.Start()
-	e := g.pi.I2cStart(i2cAddress)
+	a := api.NewAPI(g)
+	a.Port = "4000"
+	a.AddHandler(api.BasicAuth("bbq", "gopher"))
+	a.Start()
+	e := r.I2cStart(i2cAddress)
 	if e != nil {
-		return e
+		panic(e)
 	}
 	go func() {
-		errs := g.gobot.Start()
+		errs := g.Start()
 		if errs != nil {
 			// hack - maybe change interface?
 			panic(errs)
@@ -65,6 +65,7 @@ func NewController() *GobotController {
 		gobot:      g,
 		pi:         r,
 		pid:        pid,
+		api:        a,
 	}
 }
 
