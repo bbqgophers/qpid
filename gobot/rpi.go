@@ -21,15 +21,17 @@ var (
 )
 
 type GobotController struct {
-	grillProbe *GobotProbe
-	gobot      *gb.Gobot
-	pi         *raspi.RaspiAdaptor
-	api        *api.API
-	pid        *pidctrl.PIDController
-	heating    bool
+	grillProbe    *GobotProbe
+	gobot         *gb.Gobot
+	pi            *raspi.RaspiAdaptor
+	api           *api.API
+	pid           *pidctrl.PIDController
+	heating       bool
+	notifications chan<- qpid.Notification
 }
 
 func NewController() *GobotController {
+	n := make(chan<- qpid.Notification)
 	g := gb.NewGobot()
 	r := raspi.NewRaspiAdaptor("qpid")
 	robot := gb.NewRobot("qpid",
@@ -61,11 +63,12 @@ func NewController() *GobotController {
 
 	pid := pidctrl.NewPIDController(P, I, B)
 	return &GobotController{
-		grillProbe: NewProbe(r),
-		gobot:      g,
-		pi:         r,
-		pid:        pid,
-		api:        a,
+		grillProbe:    NewProbe(r),
+		gobot:         g,
+		pi:            r,
+		pid:           pid,
+		api:           a,
+		notifications: n,
 	}
 }
 
@@ -78,7 +81,9 @@ func (g *GobotController) GrillMonitor() qpid.Monitor {
 }
 
 func (g *GobotController) Run() error {
-
+	// TODO: Decide where the blocking happens.
+	// is this routine where we block and run until
+	// receiving some signal to exit?  Or do we block in main?
 	target, err := g.grillProbe.Setpoint()
 	if err != nil {
 		return err
@@ -101,7 +106,7 @@ func (g *GobotController) Run() error {
 				if !g.heating {
 					g.heating = true
 					fmt.Println("turning on the blower")
-					err := g.pi.DigitalWrite("15",0x1)
+					err := g.pi.DigitalWrite("15", 0x1)
 					if err != nil {
 						fmt.Println("error turning on blower")
 					}
@@ -111,7 +116,7 @@ func (g *GobotController) Run() error {
 				if g.heating {
 					g.heating = false
 					fmt.Println("turning blower off")
-					err := g.pi.DigitalWrite("15",0x0)
+					err := g.pi.DigitalWrite("15", 0x0)
 					if err != nil {
 						fmt.Println("error turning off blower")
 					}
@@ -140,4 +145,12 @@ func (g *GobotController) Status() (qpid.GrillStatus, error) {
 		Time:         time.Now(),
 		GrillSensors: []qpid.Sensor{g.grillProbe},
 	}, nil
+}
+
+func (g *GobotController) Notifications() chan<- qpid.Notification {
+	return g.notifications
+}
+
+func (g *GobotController) Source() string {
+	return fmt.Sprintf("Pi Grill Controller")
 }

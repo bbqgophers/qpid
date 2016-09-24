@@ -16,12 +16,12 @@ type GobotProbe struct {
 	low         qpid.Temp
 	temperature qpid.Temp
 	pi          *raspi.RaspiAdaptor
-	alerts      chan<- qpid.Alert
+	alerts      chan<- qpid.Notification
 }
 
 func NewProbe(pi *raspi.RaspiAdaptor) *GobotProbe {
 
-	a := make(chan<- qpid.Alert)
+	a := make(chan<- qpid.Notification)
 	return &GobotProbe{
 		alerts:      a,
 		pi:          pi,
@@ -52,7 +52,7 @@ func (g *GobotProbe) LowThreshold(temp qpid.Temp) error {
 	return nil
 }
 
-func (g *GobotProbe) Alerts() chan<- qpid.Alert {
+func (g *GobotProbe) Alerts() chan<- qpid.Notification {
 	return g.alerts
 }
 func (g *GobotProbe) Temperature() (qpid.Temp, error) {

@@ -18,6 +18,15 @@ const (
 	Inside
 )
 
+type MessageType int
+
+const (
+	Info MessageType = iota
+	Warning
+	Critical
+	ThresholdAlert
+)
+
 // Temp is a temperature in Celcius
 type Temp int
 
@@ -67,11 +76,12 @@ type Sourcer interface {
 	Source() string
 }
 
-// An Alert is triggered when a Threshold is reached.
-type Alert struct {
-	Time    time.Time
-	Message string
-	Source  Sourcer
+// An Notification is a message that can be sent from various devices
+type Notification struct {
+	Time        time.Time
+	Message     string
+	MessageType MessageType
+	Source      Sourcer
 }
 
 // A Thresholder watches a probe for high and low values,
@@ -79,7 +89,7 @@ type Alert struct {
 type Thresholder interface {
 	HighThreshold(Temp) error
 	LowThreshold(Temp) error
-	Alerts() chan<- Alert
+	Alerts() chan<- Notification
 }
 
 // A Targeter sets the desired temperature for a device.
@@ -107,4 +117,17 @@ type CookController interface {
 // GrillReporter outputs metrics from a Grill
 type GrillReporter interface {
 	Status() (GrillStatus, error)
+	Notifications() chan<- Notification
+}
+
+type NotificationSink interface {
+	Listen(chan<- Notification)
+}
+
+type AlertSink interface {
+	Listen(chan<- Notification)
+}
+
+type MetricSink interface {
+	Listen(chan<- GrillStatus)
 }
