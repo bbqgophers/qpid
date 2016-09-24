@@ -101,12 +101,20 @@ func (g *GobotController) Run() error {
 				if !g.heating {
 					g.heating = true
 					fmt.Println("turning on the blower")
+					err := g.pi.DigitalWrite("15",0x1)
+					if err != nil {
+						fmt.Println("error turning on blower")
+					}
 				}
 				fmt.Println("leaving blower on")
 			} else {
 				if g.heating {
 					g.heating = false
 					fmt.Println("turning blower off")
+					err := g.pi.DigitalWrite("15",0x0)
+					if err != nil {
+						fmt.Println("error turning off blower")
+					}
 				}
 			}
 		}
