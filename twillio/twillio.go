@@ -1,10 +1,20 @@
 package twillio
 
-import "github.com/bbqgophers/qpid"
+import (
+	"log"
+
+	"github.com/bbqgophers/qpid"
+)
 
 type TwillioClient struct {
 }
 
-func (t *TwillioClient) Listen(chan<- qpid.Notification) {
-	panic("not implemented")
+func NewClient() *TwillioClient {
+	return &TwillioClient{}
+}
+
+func (t *TwillioClient) Listen(a chan qpid.Notification) {
+	for message := range a {
+		log.Printf("ALERT: %#v", message)
+	}
 }
