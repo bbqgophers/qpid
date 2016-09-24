@@ -1,6 +1,7 @@
 package qpid
 
 import (
+	"fmt"
 	"math"
 	"time"
 )
@@ -10,13 +11,60 @@ type Location int
 
 // TODO: Need other location constants, think more here
 const (
-	_ Location = iota
-	Food
+	Food1 Location = iota
+	Food2
+	Food3
+	Food4
+	Food5
+	Food6
 	Top
 	Bottom
 	Outside
 	Inside
+	Right
+	Left
 )
+
+// LocationMap returns string values for
+// Locations
+var LocationMap = map[Location]string{
+	Food1:   "FOOD1",
+	Food2:   "FOOD2",
+	Food3:   "FOOD3",
+	Food4:   "FOOD4",
+	Food5:   "FOOD5",
+	Food6:   "FOOD6",
+	Top:     "TOP",
+	Bottom:  "BOTTOM",
+	Outside: "OUTSIDE",
+	Inside:  "INSIDE",
+	Right:   "RIGHT",
+	Left:    "LEFT,",
+}
+
+// MessageType is a constant for different levels
+// of messages
+type MessageType int
+
+const (
+	// Info is an informational message type
+	Info MessageType = iota
+	// Warning is an warning message type
+	Warning
+	// Critical is a critical message type
+	Critical
+	// ThresholdAlert is a message type to indicate a threshold has been reached
+	ThresholdAlert
+)
+
+// MessageMap returns string values for
+// MessageTypes
+var MessageMap = map[MessageType]string{
+	Info:           "INFO",
+	Warning:        "WARNING",
+	Critical:       "CRITICAL",
+	ThresholdAlert: "THRESHOLD ALERT",
+}
 
 // Temp is a temperature in Celcius
 type Temp int
@@ -67,11 +115,18 @@ type Sourcer interface {
 	Source() string
 }
 
-// An Alert is triggered when a Threshold is reached.
-type Alert struct {
-	Time    time.Time
-	Message string
-	Source  Sourcer
+// An Notification is a message that can be sent from various devices
+type Notification struct {
+	Time        time.Time
+	Message     string
+	MessageType MessageType
+	Source      Sourcer
+}
+
+// GoString implements the GoStringer interface to allow
+// notifications to be printed as strings
+func (n Notification) GoString() string {
+	return fmt.Sprintf("%s: [%s] %s -  %s", n.Time.String(), MessageMap[n.MessageType], n.Source.Source(), n.Message)
 }
 
 // A Thresholder watches a probe for high and low values,
@@ -79,7 +134,7 @@ type Alert struct {
 type Thresholder interface {
 	HighThreshold(Temp) error
 	LowThreshold(Temp) error
-	Alerts() chan<- Alert
+	Alerts() chan Notification
 }
 
 // A Targeter sets the desired temperature for a device.
@@ -90,6 +145,8 @@ type Targeter interface {
 	Setpoint() (Temp, error)
 }
 
+// A Monitor is a device that implements both the
+// Thresholder and Targeter interfaces
 type Monitor interface {
 	Targeter
 	Thresholder
@@ -107,4 +164,30 @@ type CookController interface {
 // GrillReporter outputs metrics from a Grill
 type GrillReporter interface {
 	Status() (GrillStatus, error)
+	Notifications() chan Notification
+	Metrics() chan GrillStatus
+}
+
+// NotificationSink is an interface that must be implemented
+// to receive Notifications from a GrillReporter.  There must
+// be one NotificationSink registered or Notification reporting will
+// block TODO: Figure out a way around blocking or create a nullsink
+type NotificationSink interface {
+	Listen(chan Notification)
+}
+
+// AlertSink is an interface that must be implemented
+// to receive Alerts from a Thresholder.  There must
+// be one AlertSink registered or Alert reporting will
+// block TODO: Figure out a way around blocking or create a nullsink
+type AlertSink interface {
+	Listen(chan Notification)
+}
+
+// MetricSink is an interface that must be implemented
+// to receive metrics from a GrillReporter.  There must
+// be one MetricSink registered or metric reporting will
+// block TODO: Figure out a way around blocking or create a nullsink
+type MetricSink interface {
+	Listen(chan GrillStatus)
 }

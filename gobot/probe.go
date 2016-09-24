@@ -2,9 +2,11 @@ package gobot
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/bbqgophers/qpid"
 	"github.com/hybridgroup/gobot/platforms/raspi"
+	"github.com/pkg/errors"
 )
 
 type GobotProbe struct {
@@ -16,12 +18,12 @@ type GobotProbe struct {
 	low         qpid.Temp
 	temperature qpid.Temp
 	pi          *raspi.RaspiAdaptor
-	alerts      chan<- qpid.Alert
+	alerts      chan qpid.Notification
 }
 
 func NewProbe(pi *raspi.RaspiAdaptor) *GobotProbe {
 
-	a := make(chan<- qpid.Alert)
+	a := make(chan qpid.Notification)
 	return &GobotProbe{
 		alerts:      a,
 		pi:          pi,
@@ -52,7 +54,7 @@ func (g *GobotProbe) LowThreshold(temp qpid.Temp) error {
 	return nil
 }
 
-func (g *GobotProbe) Alerts() chan<- qpid.Alert {
+func (g *GobotProbe) Alerts() chan qpid.Notification {
 	return g.alerts
 }
 func (g *GobotProbe) Temperature() (qpid.Temp, error) {
@@ -79,4 +81,19 @@ func (g *GobotProbe) Description() string {
 
 func (g *GobotProbe) Source() string {
 	return fmt.Sprintf("Probe %d: %s", g.id, g.description)
+}
+
+func (g *GobotProbe) String() string {
+	t, err := g.Temperature()
+	if err != nil {
+		log.Println(errors.Wrap(err, "sensor get temperature"))
+	}
+	return fmt.Sprintf("Temp %d F at %s for %s", t.F(), qpid.LocationMap[g.Location()], g.Description)
+}
+func (g *GobotProbe) GoString() string {
+	t, err := g.Temperature()
+	if err != nil {
+		log.Println(errors.Wrap(err, "sensor get temperature"))
+	}
+	return fmt.Sprintf("Temp %d F at %s for %s", t.F(), qpid.LocationMap[g.Location()], g.Description)
 }
