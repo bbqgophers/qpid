@@ -1,3 +1,5 @@
+[![](https://godoc.org/github.com/bbqgophers/qpid?status.svg)](http://godoc.org/github.com/bbqgophers/qpid)
+
 # qpid
 BBQ PID controller written in Go for Raspberry PI
 
