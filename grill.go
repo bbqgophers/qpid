@@ -42,6 +42,10 @@ var LocationMap = map[Location]string{
 	Left:    "LEFT,",
 }
 
+func (l Location) String() string {
+	return LocationMap[l]
+}
+
 // MessageType is a constant for different levels
 // of messages
 type MessageType int
