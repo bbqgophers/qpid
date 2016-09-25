@@ -17,7 +17,7 @@ func main() {
 	p := prometheus.NewSink()
 	go p.Listen(gb.Metrics())
 
-	t := twillio.NewClient()
+	t := twillio.New()
 	go t.Listen(gb.GrillMonitor().Alerts())
 	err := gb.Run()
 	if err != nil {

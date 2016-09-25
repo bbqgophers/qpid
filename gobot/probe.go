@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// GobotProbe is a thermocoupler connected to a raspberry pi
-type GobotProbe struct {
+// Probe is a thermocoupler connected to a raspberry pi
+type Probe struct {
 	id          int
 	location    qpid.Location
 	description string
@@ -22,13 +22,13 @@ type GobotProbe struct {
 	alerts      chan qpid.Notification
 }
 
-// NewProbe returns an initialized GobotProbe.
+// NewProbe returns an initialized Probe.
 // Location and description hard-coded for now, since
 // we only support one thermocoupler.
-func NewProbe(pi *raspi.RaspiAdaptor) *GobotProbe {
+func NewProbe(pi *raspi.RaspiAdaptor) *Probe {
 
 	a := make(chan qpid.Notification)
-	return &GobotProbe{
+	return &Probe{
 		alerts:      a,
 		pi:          pi,
 		id:          1,
@@ -38,7 +38,7 @@ func NewProbe(pi *raspi.RaspiAdaptor) *GobotProbe {
 }
 
 // Target is the temperature we'd like to reach
-func (g *GobotProbe) Target(temp qpid.Temp) (qpid.Temp, error) {
+func (g *Probe) Target(temp qpid.Temp) (qpid.Temp, error) {
 	g.setpoint = temp
 	// todo get temp and return that instead
 	// if possible
@@ -46,33 +46,33 @@ func (g *GobotProbe) Target(temp qpid.Temp) (qpid.Temp, error) {
 }
 
 // Setpoint is the current Target
-func (g *GobotProbe) Setpoint() (qpid.Temp, error) {
+func (g *Probe) Setpoint() (qpid.Temp, error) {
 	return g.setpoint, nil
 }
 
 // HighThreshold is the temperature max before a critical
 // alert should be sent
-func (g *GobotProbe) HighThreshold(temp qpid.Temp) error {
+func (g *Probe) HighThreshold(temp qpid.Temp) error {
 	g.high = temp
 	return nil
 }
 
 // LowThreshold is the temperature min before a critical alert
 // should be sent
-func (g *GobotProbe) LowThreshold(temp qpid.Temp) error {
+func (g *Probe) LowThreshold(temp qpid.Temp) error {
 	g.low = temp
 	return nil
 }
 
 // Alerts returns a channel of notifications for probe
 // alerts
-func (g *GobotProbe) Alerts() chan qpid.Notification {
+func (g *Probe) Alerts() chan qpid.Notification {
 	return g.alerts
 }
 
 // Temperature reads and returns the current temperature
 // from the probe
-func (g *GobotProbe) Temperature() (qpid.Temp, error) {
+func (g *Probe) Temperature() (qpid.Temp, error) {
 	var t qpid.Temp
 	b, e := g.pi.I2cRead(i2cAddress, 3)
 	if e != nil {
@@ -88,29 +88,29 @@ func (g *GobotProbe) Temperature() (qpid.Temp, error) {
 }
 
 // Location returns the probe's location
-func (g *GobotProbe) Location() qpid.Location {
+func (g *Probe) Location() qpid.Location {
 	return g.location
 }
 
 // Description returns the probe's description
-func (g *GobotProbe) Description() string {
+func (g *Probe) Description() string {
 	return g.description
 }
 
 // Source implements qpid.Sourcer and returns
 // the source of a notification
-func (g *GobotProbe) Source() string {
+func (g *Probe) Source() string {
 	return fmt.Sprintf("Probe %d: %s", g.id, g.description)
 }
 
-func (g *GobotProbe) String() string {
+func (g *Probe) String() string {
 	t, err := g.Temperature()
 	if err != nil {
 		log.Println(errors.Wrap(err, "sensor get temperature"))
 	}
 	return fmt.Sprintf("Temp %d F at %s for %s", t.F(), qpid.LocationMap[g.Location()], g.Description)
 }
-func (g *GobotProbe) GoString() string {
+func (g *Probe) GoString() string {
 	t, err := g.Temperature()
 	if err != nil {
 		log.Println(errors.Wrap(err, "sensor get temperature"))

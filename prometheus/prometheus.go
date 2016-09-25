@@ -20,7 +20,9 @@ func NewSink() *Sink {
 }
 
 // Listen starts a GrillStatus listener on GrillStatus channel
-// reporting messages received to Prometheus
+// reporting messages received to Prometheus.  Must be started
+// in a goroutine before starting grill run loop or grill will block
+// when it tries to send first status
 func (p *Sink) Listen(s chan qpid.GrillStatus) {
 
 	tempGauge := prometheus.NewGaugeVec(prometheus.GaugeOpts{

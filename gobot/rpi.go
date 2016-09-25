@@ -12,18 +12,28 @@ import (
 	"github.com/pkg/errors"
 )
 
+// i2cAddress is the location that we read
+// to get the temperatures from the i2c bus
 const i2cAddress = 0x4d
 
 var (
-	Sleep                  = 10
-	P                      = 3.0
-	I                      = .05
-	B                      = 0.0
+	// Sleep is the duration in seconds we hold when
+	// temperature is met
+	Sleep = 10
+	// P is the P in PID :)
+	P = 3.0
+	// I is the I in PID
+	I = .05
+	// B is a booster.  Currently unused
+	B = 0.0
+	// MetricsIntervalSeconds is the metric reporting interval
 	MetricsIntervalSeconds = 1
 )
 
-type GobotController struct {
-	grillProbe    *GobotProbe
+// Controller represents all the electronics that
+// make the PID work
+type Controller struct {
+	grillProbe    *Probe
 	gobot         *gb.Gobot
 	pi            *raspi.RaspiAdaptor
 	api           *api.API
@@ -33,7 +43,9 @@ type GobotController struct {
 	metrics       chan qpid.GrillStatus
 }
 
-func NewController() *GobotController {
+// NewController returns a new Controller
+// initialized.
+func NewController() *Controller {
 	n := make(chan qpid.Notification)
 	metrics := make(chan qpid.GrillStatus)
 	g := gb.NewGobot()
@@ -66,7 +78,7 @@ func NewController() *GobotController {
 	}()
 
 	pid := pidctrl.NewPIDController(P, I, B)
-	return &GobotController{
+	return &Controller{
 		grillProbe:    NewProbe(r),
 		gobot:         g,
 		pi:            r,
@@ -77,15 +89,18 @@ func NewController() *GobotController {
 	}
 }
 
-func (g *GobotController) FoodMonitors() []qpid.Monitor {
+// FoodMonitors returns the food monitors
+func (g *Controller) FoodMonitors() []qpid.Monitor {
 	panic("not implemented")
 }
 
-func (g *GobotController) GrillMonitor() qpid.Monitor {
+// GrillMonitor returns the grill probe
+func (g *Controller) GrillMonitor() qpid.Monitor {
 	return g.grillProbe
 }
 
-func (g *GobotController) Run() error {
+// Run starts the grill's run loop and blocks
+func (g *Controller) Run() error {
 	// TODO: Decide where the blocking happens.
 	// is this routine where we block and run until
 	// receiving some signal to exit?  Or do we block in main?
@@ -151,7 +166,10 @@ func (g *GobotController) Run() error {
 	return nil
 }
 
-func (g *GobotController) Stop() error {
+// Stop stops the grill's run loop
+// but actually probably wont.  because
+// there's nothing to do that yet.
+func (g *Controller) Stop() error {
 
 	g.notify(qpid.Info, "Received Stop Request")
 	errs := g.gobot.Stop()
@@ -162,17 +180,22 @@ func (g *GobotController) Stop() error {
 
 	return nil
 }
-func (g *GobotController) Status() (qpid.GrillStatus, error) {
+
+// Status returns the current Grill status.
+func (g *Controller) Status() (qpid.GrillStatus, error) {
 	return qpid.GrillStatus{
 		Time:         time.Now(),
 		GrillSensors: []qpid.Sensor{g.grillProbe},
 	}, nil
 }
 
-func (g *GobotController) Notifications() chan qpid.Notification {
+// Notifications returns the Grill's notification channel
+func (g *Controller) Notifications() chan qpid.Notification {
 	return g.notifications
 }
-func (g *GobotController) notify(mt qpid.MessageType, message string) {
+
+// notify sends a message on the grill's notification channel
+func (g *Controller) notify(mt qpid.MessageType, message string) {
 	n := qpid.Notification{
 		Time:        time.Now(),
 		Message:     message,
@@ -182,10 +205,14 @@ func (g *GobotController) notify(mt qpid.MessageType, message string) {
 	g.notifications <- n
 
 }
-func (g *GobotController) Metrics() chan qpid.GrillStatus {
+
+// Metrics returns the grill's metric channel
+func (g *Controller) Metrics() chan qpid.GrillStatus {
 	return g.metrics
 }
 
-func (g *GobotController) Source() string {
+// Source implements Sourcer for pretty printing of events
+// and notifications
+func (g *Controller) Source() string {
 	return fmt.Sprintf("Pi Grill Controller")
 }
