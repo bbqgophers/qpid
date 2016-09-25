@@ -6,10 +6,9 @@ QPID<br/>
 Time: {{.Time}} <br/>
 Sensors:<br/>
 {{ range $idx, $sensor := .GrillSensors }}
-Location: {{ $sensor.Location }} <br/>
-Description: {{ $sensor.Description }}
-{{ $t, $e := $sensor.Temperature }}
-Temperature: {{ $t.F}} <br/>
+&nbsp;Location: {{ $sensor.Location }} <br/>
+&nbsp;Description: {{ $sensor.Description }} <br/>
+&nbsp;Temperature: {{ $sensor.Temperature }} <br/>
 {{ end }}
 </body>
 </html>`

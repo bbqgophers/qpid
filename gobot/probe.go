@@ -3,7 +3,6 @@ package gobot
 import (
 	"fmt"
 	"log"
-
 	"github.com/bbqgophers/qpid"
 	"github.com/hybridgroup/gobot/platforms/raspi"
 	"github.com/pkg/errors"
@@ -79,12 +78,14 @@ func (g *Probe) Temperature() (qpid.Temp, error) {
 	if e != nil {
 		return t, e
 	}
-	// 2nd byte is temp C * 5
-	// 3rd byte is temp over 127
-	c := b[1] << 8
-	c = c + b[2]
-	c = c / 5
-	g.temperature = qpid.Temp(c)
+
+	var final uint
+
+	final = uint(b[0]) << 8
+	final = final + uint(b[1])
+	final = final / 5
+
+	g.temperature = qpid.Temp(int(final))
 	return g.temperature, e
 }
 
