@@ -70,7 +70,7 @@ func NewController() *Controller {
 		panic(e)
 	}
 	pid := pidctrl.NewPIDController(P, I, B)
-	pid.SetOutputLimits(-50.0, 50.0)
+	pid.SetOutputLimits(-100.0, 100.0)
 	return &Controller{
 		grillProbe:    NewProbe(r),
 		gobot:         g,
