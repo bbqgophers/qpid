@@ -46,8 +46,6 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 				log.Println(errors.Wrap(err, "get temperature"))
 			}
 			tempGauge.WithLabelValues(s.Description()).Set(float64(t.F()))
-			// take this out later
-			log.Printf("Metrics: %#v", message)
 		}
 	}
 }
