@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/bbqgophers/qpid/gobot"
+	"github.com/bbqgophers/qpid/http"
 	"github.com/bbqgophers/qpid/log"
 	"github.com/bbqgophers/qpid/prometheus"
 	"github.com/bbqgophers/qpid/twillio"
@@ -9,17 +10,15 @@ import (
 
 func main() {
 	gb := gobot.NewController()
-	gb.GrillMonitor().Target(100)
 
 	l := log.New()
-	go l.Listen(gb.Notifications())
 
 	p := prometheus.NewSink()
-	go p.Listen(gb.Metrics())
 
 	t := twillio.New()
-	go t.Listen(gb.GrillMonitor().Alerts())
-	err := gb.Run()
+
+	s := http.NewServer(gb, t, l, p)
+	err := s.ListenAndServe(":8080")
 	if err != nil {
 		panic(err)
 	}

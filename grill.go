@@ -83,6 +83,13 @@ func (t *Temp) F() int {
 	return int(temp)
 }
 
+// TempFromF returns Temp from a fahrenheit value
+func TempFromF(f int) Temp {
+	c := math.Floor(float64((f - 32)) / 1.8)
+	return Temp(c)
+
+}
+
 // A Grill represents the cooking chamber of a BBQ cooker.
 // It can contain one or more Sensors which report the current
 // temperature.
@@ -155,6 +162,7 @@ type Monitor interface {
 // A CookController manages the cook.  A new cook is started by
 // calling Run()
 type CookController interface {
+	GrillReporter
 	FoodMonitors() []Monitor
 	GrillMonitor() Monitor
 	Run() error

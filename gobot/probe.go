@@ -32,6 +32,7 @@ func NewProbe(pi *raspi.RaspiAdaptor) *Probe {
 		alerts:      a,
 		pi:          pi,
 		id:          1,
+		setpoint:    qpid.TempFromF(225),
 		location:    qpid.Inside,
 		description: "Grill Internal Probe 1",
 	}
