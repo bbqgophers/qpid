@@ -69,14 +69,6 @@ func NewController() *Controller {
 	if e != nil {
 		panic(e)
 	}
-	go func() {
-		errs := g.Start()
-		if errs != nil {
-			// hack - maybe change interface?
-			panic(errs)
-		}
-	}()
-
 	pid := pidctrl.NewPIDController(P, I, B)
 	return &Controller{
 		grillProbe:    NewProbe(r),
@@ -101,6 +93,15 @@ func (g *Controller) GrillMonitor() qpid.Monitor {
 
 // Run starts the grill's run loop and blocks
 func (g *Controller) Run() error {
+
+	go func() {
+		errs := g.gobot.Start()
+		if errs != nil {
+			// hack - maybe change interface?
+			panic(errs)
+		}
+	}()
+
 	// TODO: Decide where the blocking happens.
 	// is this routine where we block and run until
 	// receiving some signal to exit?  Or do we block in main?
