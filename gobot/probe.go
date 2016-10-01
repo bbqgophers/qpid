@@ -3,6 +3,7 @@ package gobot
 import (
 	"fmt"
 	"log"
+	"sync"
 	"github.com/bbqgophers/qpid"
 	"github.com/hybridgroup/gobot/platforms/raspi"
 	"github.com/pkg/errors"
@@ -19,6 +20,7 @@ type Probe struct {
 	temperature qpid.Temp
 	pi          *raspi.RaspiAdaptor
 	alerts      chan qpid.Notification
+	tempMu      sync.Mutex
 }
 
 // NewProbe returns an initialized Probe.
@@ -73,17 +75,22 @@ func (g *Probe) Alerts() chan qpid.Notification {
 // Temperature reads and returns the current temperature
 // from the probe
 func (g *Probe) Temperature() (qpid.Temp, error) {
+	g.tempMu.Lock()
+	defer g.tempMu.Unlock()
 	var t qpid.Temp
-	b, e := g.pi.I2cRead(i2cAddress, 3)
+	b, e := g.pi.I2cRead(i2cAddress, 2)
 	if e != nil {
 		return t, e
 	}
 
 	var final uint
+	fmt.Println("b0,b1:", b[0],b[1])
 
 	final = uint(b[0]) << 8
 	final = final + uint(b[1])
 	final = final / 5
+
+	fmt.Println("b0,b1,final:", b[0],b[1],final)
 
 	g.temperature = qpid.Temp(int(final))
 	return g.temperature, e
