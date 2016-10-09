@@ -34,6 +34,8 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 		"sensor",
 	},
 	)
+
+	prometheus.MustRegister(tempGauge)
 	setGauge := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "qpid",
 		Subsystem: "grill",
