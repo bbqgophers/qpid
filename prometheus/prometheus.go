@@ -64,7 +64,7 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 			if err != nil {
 				log.Println(errors.Wrap(err, "get temperature"))
 			}
-			log.Println("Temp: c ", s.Temperature())
+			log.Println("Temp: c ", t)
 			tempGauge.WithLabelValues(s.Description()).Set(float64(t.F()))
 
 			set, err := s.Setpoint()
