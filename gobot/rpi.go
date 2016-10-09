@@ -27,7 +27,7 @@ var (
 	// B is a booster.  Currently unused
 	B = 0.0
 	// MetricsIntervalSeconds is the metric reporting interval
-	MetricsIntervalSeconds = 1
+	MetricsIntervalSeconds = 5
 )
 
 // Controller represents all the electronics that
@@ -188,6 +188,7 @@ func (g *Controller) Status() (qpid.GrillStatus, error) {
 	return qpid.GrillStatus{
 		Time:         time.Now(),
 		GrillSensors: []qpid.Sensor{g.grillProbe},
+		FanOn:        g.heating,
 	}, nil
 }
 

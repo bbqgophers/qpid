@@ -34,8 +34,27 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 		"sensor",
 	},
 	)
-	prometheus.MustRegister(tempGauge)
+	setGauge := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "qpid",
+		Subsystem: "grill",
+		Name:      "setpoint_f",
+		Help:      "Grill setpoint.",
+	}, []string{
+		"sensor",
+	},
+	)
+	prometheus.MustRegister(setGauge)
 
+	fanGauge := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "qpid",
+		Subsystem: "grill",
+		Name:      "fan_bool",
+		Help:      "Blower ON = 1 OFF = 0.",
+	}, []string{
+		"sensor",
+	},
+	)
+	prometheus.MustRegister(fanGauge)
 	http.Handle("/metrics", prometheus.Handler())
 	go http.ListenAndServe(":8080", nil)
 
@@ -46,6 +65,22 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 				log.Println(errors.Wrap(err, "get temperature"))
 			}
 			tempGauge.WithLabelValues(s.Description()).Set(float64(t.F()))
+
+			set, err := s.Setpoint()
+			if err != nil {
+				log.Println(errors.Wrap(err, "get setpoint"))
+			}
+			setGauge.WithLabelValues(s.Description()).Set(float64(set.F()))
+
+			fan := message.FanOn
+			v := 0.0
+			if fan {
+				v = 1.0
+			}
+			fanGauge.WithLabelValues(s.Description()).Set(float64(v))
+
 		}
+
 	}
+
 }

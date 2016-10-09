@@ -111,6 +111,7 @@ type GrillStatus struct {
 	Time         time.Time
 	GrillSensors []Sensor
 	FoodSensors  []Sensor
+	FanOn        bool
 }
 
 // Sensor is the interface to retrieve the current temperature
@@ -119,6 +120,7 @@ type Sensor interface {
 	Temperature() (Temp, error)
 	Location() Location
 	Description() string
+	Setpointer
 }
 
 // Sourcer provides a string representing the source of an Alert
@@ -152,6 +154,10 @@ type Thresholder interface {
 type Targeter interface {
 	// Target sets the desired temperature, returns current and/or error
 	Target(Temp) (Temp, error)
+}
+
+// A Setpointer can return the current target temperature
+type Setpointer interface {
 	// Setpoint() returns the currently set desired temperature
 	Setpoint() (Temp, error)
 }
