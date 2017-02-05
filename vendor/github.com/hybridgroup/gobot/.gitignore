@@ -1,0 +1,6 @@
+.sass-cache
+*.test
+*.swp
+profile.cov
+count.out
+*.swp
