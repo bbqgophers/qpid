@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"sync"
+
+	"github.com/bbqgophers/messages"
 	"github.com/bbqgophers/qpid"
 	"github.com/hybridgroup/gobot/platforms/raspi"
 	"github.com/pkg/errors"
@@ -12,12 +14,12 @@ import (
 // Probe is a thermocoupler connected to a raspberry pi
 type Probe struct {
 	id          int
-	location    qpid.Location
+	location    messages.Location
 	description string
-	setpoint    qpid.Temp
-	high        qpid.Temp
-	low         qpid.Temp
-	temperature qpid.Temp
+	setpoint    messages.Temp
+	high        messages.Temp
+	low         messages.Temp
+	temperature messages.Temp
 	pi          *raspi.RaspiAdaptor
 	alerts      chan qpid.Notification
 	tempMu      sync.Mutex
@@ -33,14 +35,14 @@ func NewProbe(pi *raspi.RaspiAdaptor) *Probe {
 		alerts:      a,
 		pi:          pi,
 		id:          1,
-		setpoint:    qpid.TempFromF(225),
-		location:    qpid.Inside,
+		setpoint:    messages.TempFromF(225),
+		location:    messages.Inside,
 		description: "Grill Internal Probe 1",
 	}
 }
 
 // Target is the temperature we'd like to reach
-func (g *Probe) Target(temp qpid.Temp) (qpid.Temp, error) {
+func (g *Probe) Target(temp messages.Temp) (messages.Temp, error) {
 	g.setpoint = temp
 	// todo get temp and return that instead
 	// if possible
@@ -48,20 +50,20 @@ func (g *Probe) Target(temp qpid.Temp) (qpid.Temp, error) {
 }
 
 // Setpoint is the current Target
-func (g *Probe) Setpoint() (qpid.Temp, error) {
+func (g *Probe) Setpoint() (messages.Temp, error) {
 	return g.setpoint, nil
 }
 
 // HighThreshold is the temperature max before a critical
 // alert should be sent
-func (g *Probe) HighThreshold(temp qpid.Temp) error {
+func (g *Probe) HighThreshold(temp messages.Temp) error {
 	g.high = temp
 	return nil
 }
 
 // LowThreshold is the temperature min before a critical alert
 // should be sent
-func (g *Probe) LowThreshold(temp qpid.Temp) error {
+func (g *Probe) LowThreshold(temp messages.Temp) error {
 	g.low = temp
 	return nil
 }
@@ -74,10 +76,10 @@ func (g *Probe) Alerts() chan qpid.Notification {
 
 // Temperature reads and returns the current temperature
 // from the probe
-func (g *Probe) Temperature() (qpid.Temp, error) {
+func (g *Probe) Temperature() (messages.Temp, error) {
 	g.tempMu.Lock()
 	defer g.tempMu.Unlock()
-	var t qpid.Temp
+	var t messages.Temp
 	b, e := g.pi.I2cRead(i2cAddress, 2)
 	if e != nil {
 		return t, e
@@ -92,12 +94,12 @@ func (g *Probe) Temperature() (qpid.Temp, error) {
 
 	fmt.Println("b0,b1,final:", b[0],b[1],final)
 
-	g.temperature = qpid.Temp(int(final))
+	g.temperature = messages.Temp(int(final))
 	return g.temperature, e
 }
 
 // Location returns the probe's location
-func (g *Probe) Location() qpid.Location {
+func (g *Probe) Location() messages.Location {
 	return g.location
 }
 
@@ -117,12 +119,12 @@ func (g *Probe) String() string {
 	if err != nil {
 		log.Println(errors.Wrap(err, "sensor get temperature"))
 	}
-	return fmt.Sprintf("Temp %d F at %s for %s", t.F(), qpid.LocationMap[g.Location()], g.Description)
+	return fmt.Sprintf("Temp %d F at %s for %s", t.F(), messages.LocationMap[g.Location()], g.Description)
 }
 func (g *Probe) GoString() string {
 	t, err := g.Temperature()
 	if err != nil {
 		log.Println(errors.Wrap(err, "sensor get temperature"))
 	}
-	return fmt.Sprintf("Temp %d F at %s for %s", t.F(), qpid.LocationMap[g.Location()], g.Description)
+	return fmt.Sprintf("Temp %d F at %s for %s", t.F(), messages.LocationMap[g.Location()], g.Description)
 }

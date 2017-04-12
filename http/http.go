@@ -4,7 +4,7 @@ import (
 	"html/template"
 	h "net/http"
 	"strconv"
-
+	"github.com/bbqgophers/messages"
 	"github.com/bbqgophers/qpid"
 	"github.com/gorilla/mux"
 )
@@ -72,7 +72,7 @@ func (s *Server) Run(w h.ResponseWriter, r *h.Request) {
 		w.Write([]byte("Can't parse temperature as a number"))
 		return
 	}
-	temp := qpid.TempFromF(tf)
+	temp := messages.TempFromF(tf)
 	s.controller.GrillMonitor().Target(temp) //ignoring return temp and error TODO
 
 	// start that cook!
