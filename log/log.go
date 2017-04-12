@@ -6,6 +6,10 @@ import (
 	"github.com/bbqgophers/qpid"
 )
 
+type Logger interface {
+	Listen(n chan qpid.Notification)
+}
+
 // Log implements the qpid.NotificationSink interface
 // logging messages to standard out (for now)
 type Log struct {

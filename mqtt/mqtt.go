@@ -3,12 +3,20 @@ package mqtt
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+
 	"github.com/bbqgophers/messages"
 	"github.com/bbqgophers/qpid"
 	"github.com/gomqtt/client"
 	"github.com/pkg/errors"
-	"log"
 )
+
+type Sinker interface {
+	Listen(s chan qpid.GrillStatus)
+	FanTopic() string
+	GrillTopic() string
+	SetTopic() string
+}
 
 // Sink is a qpid.MetricSink that
 // Reports metrics to MQTT

@@ -6,6 +6,10 @@ import (
 	"github.com/bbqgophers/qpid"
 )
 
+type TwillioClienter interface {
+	Listen(a chan qpid.Notification)
+}
+
 // Client is a struct to hold
 // twillio config
 type Client struct {
