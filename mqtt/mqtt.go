@@ -105,12 +105,9 @@ func (p *Sink) FanTopic() string {
 }
 
 func (p *Sink) GrillTopic() string {
-
 	return p.topic + "/grill"
 }
 
 func (p *Sink) SetTopic() string {
-
 	return p.topic + "/setpoint"
-
 }
