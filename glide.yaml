@@ -1,0 +1,16 @@
+package: github.com/bbqgophers/qpid
+import:
+- package: github.com/felixge/pidctrl
+- package: github.com/gorilla/mux
+  version: ^1.3.0
+- package: github.com/hybridgroup/gobot
+  version: 5442e0bd8b0c909b552677b2790b4eddbb7e7e48
+  subpackages:
+  - api
+  - platforms/raspi
+- package: github.com/pkg/errors
+  version: ~0.8.0
+- package: github.com/prometheus/client_golang
+  version: ~0.8.0
+  subpackages:
+  - prometheus
