@@ -27,3 +27,5 @@ _testmain.go
 .vscode/*
 
 .DS_Store
+
+vendor/
