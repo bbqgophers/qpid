@@ -11,6 +11,18 @@ import (
 	"github.com/pkg/errors"
 )
 
+type Prober interface {
+	Target(temp messages.Temp) (messages.Temp, error)
+	Setpoint() (messages.Temp, error)
+	HighThreshold(temp messages.Temp)
+	LowThreshold(temp messages.Temp)
+	Alerts() chan qpid.Notification
+	Temperature() (messages.Temp, error)
+	Location() messages.Location
+	Description() string
+	Source() string
+}
+
 // Probe is a thermocoupler connected to a raspberry pi
 type Probe struct {
 	id          int
@@ -86,13 +98,13 @@ func (g *Probe) Temperature() (messages.Temp, error) {
 	}
 
 	var final uint
-	fmt.Println("b0,b1:", b[0],b[1])
+	fmt.Println("b0,b1:", b[0], b[1])
 
 	final = uint(b[0]) << 8
 	final = final + uint(b[1])
 	final = final / 5
 
-	fmt.Println("b0,b1,final:", b[0],b[1],final)
+	fmt.Println("b0,b1,final:", b[0], b[1], final)
 
 	g.temperature = messages.Temp(int(final))
 	return g.temperature, e

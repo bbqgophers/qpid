@@ -1,0 +1,4 @@
+%module gocv
+
+%include "gocv_core.i"
+%include "gocv_calib3d.i"

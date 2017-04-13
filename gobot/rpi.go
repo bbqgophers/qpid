@@ -30,6 +30,17 @@ var (
 	MetricsIntervalSeconds = 5
 )
 
+type Controllerer interface {
+	FoodMonitors() []qpid.Monitor
+	GrillMonitor() qpid.Monitor
+	Run() error
+	Stop() error
+	Status() (qpid.GrillStatus, error)
+	Notifications() chan qpid.Notification
+	Metrics() chan qpid.GrillStatus
+	Source() string
+}
+
 // Controller represents all the electronics that
 // make the PID work
 type Controller struct {
