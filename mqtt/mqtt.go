@@ -58,6 +58,7 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 		}
 		fsm := messages.FanStatus{
 			FanOn: fst,
+			Time:  time.Now(),
 		}
 
 		b, err := json.Marshal(fsm)
@@ -78,6 +79,7 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 
 			tm := messages.GrillTemp{
 				Temp: t,
+				Time: time.Now(),
 			}
 
 			b, err := json.Marshal(tm)
@@ -94,6 +96,7 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 
 			gtm := messages.GrillTarget{
 				Temp: set,
+				Time: time.Now(),
 			}
 
 			b, err = json.Marshal(gtm)
