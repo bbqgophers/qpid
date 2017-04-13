@@ -70,7 +70,11 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 			panic(err)
 		}
 		for _, s := range status.GrillSensors {
-			t := s.Temperature().F()
+			t, err := s.Temperature()
+			if err != nil {
+				fmt.Println("Err getting temp", err)
+			}
+
 			tm := messages.GrillTemp{
 				Temp: t,
 				Time: time.Now(),
@@ -83,8 +87,11 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 
 			p.service.Publish(p.GrillTopic(), b, 0, false)
 
-			set := s.Setpoint().F()
+			set, err := s.Setpoint()
 
+			if err != nil {
+				fmt.Println("Err getting temp", err)
+			}
 			gtm := messages.GrillTarget{
 				Temp: set,
 				Time: time.Now(),
