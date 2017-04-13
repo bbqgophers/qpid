@@ -41,6 +41,7 @@ func (s *Server) ListenAndServe(addr string) error {
 
 	s.router.HandleFunc("/", s.Index).Methods("GET")
 	s.router.HandleFunc("/run", s.Run).Methods("POST")
+	s.router.HandleFunc("/target", s.Target).Methods("POST")
 	s.router.HandleFunc("/status", s.Status).Methods("GET")
 	err := h.ListenAndServe(addr, s.router)
 	return err
@@ -58,6 +59,25 @@ func (s *Server) Index(w h.ResponseWriter, r *h.Request) {
 	t.Execute(w, nil)
 }
 
+// Run starts a cook
+func (s *Server) Target(w h.ResponseWriter, r *h.Request) {
+	t := r.PostFormValue("temp")
+	if t == "" {
+		w.WriteHeader(400)
+		w.Write([]byte("Temperature not provided"))
+		return
+	}
+	tf, err := strconv.Atoi(t)
+	if err != nil {
+		w.WriteHeader(400)
+		w.Write([]byte("Can't parse temperature as a number"))
+		return
+	}
+	temp := messages.TempFromF(tf)
+	s.controller.GrillMonitor().Target(temp) //ignoring return temp and error TODO
+	h.Redirect(w, r, "/status", h.StatusSeeOther)
+	return
+}
 // Run starts a cook
 func (s *Server) Run(w h.ResponseWriter, r *h.Request) {
 	t := r.PostFormValue("temp")

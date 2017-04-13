@@ -125,6 +125,14 @@ func (g *Controller) Run() error {
 	}()
 
 	for { // block here for now
+		// get the setpoint on every cycle in case the
+		// temp target has changed
+		target, err := g.grillProbe.Setpoint()
+		if err != nil {
+			return err
+		}
+		g.pid.Set(float64(target))
+
 		time.Sleep(1 * time.Second)
 		temp, err := g.grillProbe.Temperature()
 		if err != nil {
