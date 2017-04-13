@@ -4,6 +4,8 @@ import "github.com/stretchr/testify/mock"
 
 import "C"
 
+// *DO NOT EDIT* Auto-generated via mockery
+
 type lw struct {
 	mock.Mock
 }

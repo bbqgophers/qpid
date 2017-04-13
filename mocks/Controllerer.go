@@ -4,6 +4,8 @@ import "github.com/stretchr/testify/mock"
 
 import "github.com/bbqgophers/qpid"
 
+// *DO NOT EDIT* Auto-generated via mockery
+
 type Controllerer struct {
 	mock.Mock
 }

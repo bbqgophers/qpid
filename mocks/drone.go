@@ -2,6 +2,8 @@ package mocks
 
 import "github.com/stretchr/testify/mock"
 
+// *DO NOT EDIT* Auto-generated via mockery
+
 type drone struct {
 	mock.Mock
 }

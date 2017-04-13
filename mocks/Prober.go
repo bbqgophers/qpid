@@ -5,6 +5,8 @@ import "github.com/stretchr/testify/mock"
 import "github.com/bbqgophers/messages"
 import "github.com/bbqgophers/qpid"
 
+// *DO NOT EDIT* Auto-generated via mockery
+
 type Prober struct {
 	mock.Mock
 }

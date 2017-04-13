@@ -4,6 +4,8 @@ import "github.com/stretchr/testify/mock"
 
 import "github.com/veandco/go-sdl2/sdl"
 
+// *DO NOT EDIT* Auto-generated via mockery
+
 type joystick struct {
 	mock.Mock
 }

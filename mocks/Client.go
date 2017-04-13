@@ -7,6 +7,8 @@ import "net/url"
 
 import "golang.org/x/net/context"
 
+// *DO NOT EDIT* Auto-generated via mockery
+
 type Client struct {
 	mock.Mock
 }

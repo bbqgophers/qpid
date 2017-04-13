@@ -4,6 +4,8 @@ import "github.com/stretchr/testify/mock"
 
 import cv "github.com/lazywei/go-opencv/opencv"
 
+// *DO NOT EDIT* Auto-generated via mockery
+
 type capture struct {
 	mock.Mock
 }

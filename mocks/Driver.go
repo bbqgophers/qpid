@@ -3,6 +3,8 @@ package mocks
 import "github.com/briandowns/qpid/vendor/github.com/hybridgroup/gobot"
 import "github.com/stretchr/testify/mock"
 
+// *DO NOT EDIT* Auto-generated via mockery
+
 type Driver struct {
 	mock.Mock
 }

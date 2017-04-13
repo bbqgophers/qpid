@@ -5,6 +5,8 @@ import "github.com/stretchr/testify/mock"
 
 import "os"
 
+// *DO NOT EDIT* Auto-generated via mockery
+
 type Filesystem struct {
 	mock.Mock
 }
