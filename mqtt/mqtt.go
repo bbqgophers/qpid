@@ -101,6 +101,7 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 				fmt.Println("Err marshaling Grill Setpoint", err)
 			}
 
+			p.service.Publish(p.SetTopic(), b, 0, false)
 		}
 	}
 
