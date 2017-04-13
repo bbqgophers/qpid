@@ -3,13 +3,11 @@ package mqtt
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/bbqgophers/messages"
 	"github.com/bbqgophers/qpid"
 	"github.com/gomqtt/client"
-	"github.com/pkg/errors"
 )
 
 // Sink is a qpid.MetricSink that
@@ -72,11 +70,7 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 			panic(err)
 		}
 		for _, s := range status.GrillSensors {
-			t, err := s.Temperature().F()
-			if err != nil {
-				log.Println(errors.Wrap(err, "get temperature"))
-			}
-
+			t := s.Temperature().F()
 			tm := messages.GrillTemp{
 				Temp: t,
 				Time: time.Now(),
@@ -89,10 +83,7 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 
 			p.service.Publish(p.GrillTopic(), b, 0, false)
 
-			set, err := s.Setpoint().F()
-			if err != nil {
-				log.Println(errors.Wrap(err, "get setpoint"))
-			}
+			set := s.Setpoint().F()
 
 			gtm := messages.GrillTarget{
 				Temp: set,
