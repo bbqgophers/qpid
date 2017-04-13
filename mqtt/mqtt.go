@@ -3,11 +3,13 @@ package mqtt
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/bbqgophers/messages"
 	"github.com/bbqgophers/qpid"
 	"github.com/gomqtt/client"
 	"github.com/pkg/errors"
-	"log"
 )
 
 // Sink is a qpid.MetricSink that
@@ -20,26 +22,25 @@ type Sink struct {
 
 //NewSink returns a new PrometheusSink
 func NewSink(topic string) *Sink {
-	c := client.NewConfigWithClientID("mqtt://try:try@broker.shiftr.io", "gomqtt/service")
-	c.CleanSession = false
-
+	config := client.NewConfigWithClientID("mqtt://bketelsen:ncc1701c@mqtt.bbq.live", "qpid")
+	config.CleanSession = false
 	s := client.NewService()
 
 	s.OnlineCallback = func(resumed bool) {
 		fmt.Println("Online with mqtt")
-		fmt.Println("resumed: %v\n", resumed)
+		fmt.Printf("resumed: %v\n", resumed)
 	}
 	s.OfflineCallback = func() {
 		fmt.Println("offline with mqtt!")
 	}
-	err := client.ClearSession(c)
+	err := client.ClearSession(config)
 	if err != nil {
 		panic(err)
 	}
-	s.Start(c)
+	s.Start(config)
 
 	return &Sink{
-		config:  c,
+		config:  config,
 		service: s,
 		topic:   topic,
 	}
@@ -50,8 +51,25 @@ func NewSink(topic string) *Sink {
 // in a goroutine before starting grill run loop or grill will block
 // when it tries to send first status
 func (p *Sink) Listen(s chan qpid.GrillStatus) {
-
 	for status := range s {
+		var fst int
+		if status.FanOn {
+			fst = 1
+		}
+		fsm := messages.FanStatus{
+			FanOn: fst,
+		}
+
+		b, err := json.Marshal(fsm)
+		if err != nil {
+			fmt.Println("Err marshaling Fan Status", err)
+		}
+		fut := p.service.Publish(p.FanTopic(), b, 0, false)
+
+		err = fut.Wait(5 * time.Second)
+		if err != nil {
+			panic(err)
+		}
 		for _, s := range status.GrillSensors {
 			t, err := s.Temperature()
 			if err != nil {
@@ -83,18 +101,6 @@ func (p *Sink) Listen(s chan qpid.GrillStatus) {
 				fmt.Println("Err marshaling Grill Setpoint", err)
 			}
 
-			p.service.Publish(p.SetTopic(), b, 0, false)
-
-			fsm := messages.FanStatus{
-				FanOn: status.FanOn,
-			}
-
-			b, err = json.Marshal(fsm)
-			if err != nil {
-				fmt.Println("Err marshaling Fan Status", err)
-			}
-
-			p.service.Publish(p.FanTopic(), b, 0, false)
 		}
 	}
 

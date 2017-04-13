@@ -13,9 +13,6 @@ import (
 func main() {
 	gb := gobot.NewController()
 
-
-
-
 	 l := log.New()
 
 	//p := prometheus.NewSink()
