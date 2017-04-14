@@ -20,7 +20,7 @@ type Sink struct {
 
 //NewSink returns a new PrometheusSink
 func NewSink(topic string) *Sink {
-	config := client.NewConfigWithClientID("mqtt://bketelsen:ncc1701c@mqtt.bbq.live", "qpid")
+	config := client.NewConfigWithClientID("mqtt://bketelsen:password@mqtt.bbq.live", "qpid")
 	config.CleanSession = false
 	s := client.NewService()
 
